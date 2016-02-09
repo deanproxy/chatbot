@@ -13,7 +13,6 @@ end
 
 
 def get(url, username, password)
-    puts "Bamboo: Calling GET on #{url}"
     uri = URI(url)
     req = Net::HTTP::Get.new(uri.request_uri)
     req['Accept'] = 'application/json'
@@ -25,7 +24,6 @@ def get(url, username, password)
 end
 
 def post(url, username, password)
-    puts "Bamboo: Calling GET on #{url}"
     uri = URI(url)
     req = Net::HTTP::Post.new(uri.request_uri)
     req['Accept'] = 'application/json'
