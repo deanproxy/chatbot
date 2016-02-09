@@ -60,6 +60,7 @@ class Bot
                         cmd.respond(self, room, t, nick, text)
                     rescue Exception => e
                         puts "Exception caught: #{e.message}"
+                        puts e.backtrace
                         @connection_dead = true
                     end
                 end

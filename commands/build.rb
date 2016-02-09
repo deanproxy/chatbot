@@ -97,7 +97,7 @@ class BuildStart < Command
             client.send(room, "Okay. I started a build for #{@params[0]}. I'll keep an eye on it for you.")
             new_params = ["#{a}-#{j['buildNumber']}"]
             watch = BuildWatch.new(new_params)
-            watch.respond(client)
+            watch.respond(client, room)
         else
             client.send(room, "Oops. Couldn't run that build for some reason. Response from build server was:")
             client.send(room, "/code #{j['message']}")
