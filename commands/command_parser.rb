@@ -5,6 +5,7 @@ require 'default'
 require 'help'
 require 'die'
 require 'remind'
+require 'logger'
 
 $commands = {
     "(hey|hi|hello|what's up|sup|yo|i love you|welcome back)" => Salute,
@@ -25,10 +26,11 @@ $commands = {
 module CommandParser
     def CommandParser.parse(text)
         cmd = nil
+        log = Logger.new('hipbot.log')
         $commands.each do |key, clazz|
             match = text.downcase.match(key)
             if match
-                puts "Matched string: #{match[0]}. Params are: #{match[1,match.length]}"
+                log.debug("Matched string: #{match[0]}. Params are: #{match[1,match.length]}")
                 cmd = clazz.new(match[1, match.length])
                 break
             end

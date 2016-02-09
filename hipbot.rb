@@ -4,6 +4,8 @@ require 'xmpp4r/muc/helper/simplemucclient'
 require 'xmpp4r/roster'
 require 'yaml'
 require 'sqlite3'
+require 'logger'
+require 'daemons'
 
 require 'commands/command_parser'
 
@@ -17,6 +19,7 @@ class Bot
         @users = {}
         @rooms = {}
         @db = SQLite3::Database.new(@config['database']['name'])
+        @log = Logger.new('hipbot.log')
     end
 
     def config
@@ -29,6 +32,10 @@ class Bot
 
     def db
         return @db
+    end
+
+    def log
+        return @log
     end
 
     def connect
@@ -59,8 +66,8 @@ class Bot
                         cmd = CommandParser.parse($1)
                         cmd.respond(self, room, t, nick, text)
                     rescue Exception => e
-                        puts "Exception caught: #{e.message}"
-                        puts e.backtrace
+                        @log.fatal(e.message)
+                        @log.fatal(e.backtrace)
                         @connection_dead = true
                     end
                 end
@@ -92,7 +99,7 @@ class Bot
     end
 
     def run
-        warn "Running Bot..."
+        @log.info("Running Bot...")
 
         Thread.start {
             loop do
@@ -106,6 +113,7 @@ class Bot
                 sleep(1)
             end
         }.join
+        Daemons.daemonize
     end
 
 private
@@ -122,6 +130,7 @@ private
             mess.set_type(:chat)
             @client.send(mess)
             @db.execute("delete from reminders where id = ?", [row[0]])
+            @log.info("Sent a reminder to #{row[1]}")
         end
     end
 
