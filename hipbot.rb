@@ -15,6 +15,8 @@ class Bot
         @nick = @config['hipchat']['nick']
         @botname = @config['hipchat']['botname']
         @users = {}
+        @rooms = {}
+        @db = SQLite3::Database.new(@config['database']['name'])
     end
 
     def config
@@ -25,9 +27,12 @@ class Bot
         return @users
     end
 
+    def db
+        return @db
+    end
+
     def connect
         @client = Jabber::Client.new(@config['hipchat']['username'])
-        @muc = Jabber::MUC::SimpleMUCClient.new(@client)
 
         @client.connect(@config['hipchat']['server'])
         @client.auth(@config['hipchat']['password'])
@@ -42,24 +47,26 @@ class Bot
             }
         end
 
-        @muc.on_message do |time, nick, text|
-            t = (time || Time.new).strftime("%I:%M")
-            # Make sure they're talking to us.
-            if text.match("#{@botname} (.*)")
-                begin
-                    cmd = CommandParser.parse($1)
-                    cmd.respond(self, t, nick, text)
-                rescue Exception => e
-                    puts "Exception caught: #{e.message}"
-                    @connection_dead = true
+        @config['hipchat']['rooms'].each do |room|
+            @rooms[room] = Jabber::MUC::SimpleMUCClient.new(@client)
+            @rooms[room].join("#{room}@#{@config['hipchat']['conf']}/#{@config['hipchat']['nick']}", 
+                      nil, {:history => false})
+            @rooms[room].on_message do |time, nick, text|
+                t = (time || Time.new).strftime("%I:%M")
+                # Make sure they're talking to us.
+                if text.match("#{@botname} (.*)")
+                    begin
+                        cmd = CommandParser.parse($1)
+                        cmd.respond(self, room, t, nick, text)
+                    rescue Exception => e
+                        puts "Exception caught: #{e.message}"
+                        @connection_dead = true
+                    end
                 end
             end
         end
 
-        @config['hipchat']['rooms'].each do |room|
-            @muc.join("#{room}@#{@config['hipchat']['conf']}/#{@config['hipchat']['nick']}", 
-                      nil, {:history => false})
-        end
+
 
         # Load initial roster
         @roster.get_roster()
@@ -75,17 +82,16 @@ class Bot
         self
     end
 
-    def send(text, mention=nil)
+    def send(room, text, mention=nil)
         if mention 
             text = "@#{mention} #{text}"
         end
         
-        @muc.send(Jabber::Message.new(@muc.room, text))
+        @rooms[room].send(Jabber::Message.new(room, text))
     end
 
     def run
         warn "Running Bot..."
-        @db = SQLite3::Database.new(@config['database']['name'])
 
         Thread.start {
             loop do
@@ -114,7 +120,7 @@ private
             mess.body = "Hey, you wanted me to remind you: #{row[3]}"
             mess.set_type(:chat)
             @client.send(mess)
-            db.execute("delete from reminders where id = ?", [row[0]])
+            @db.execute("delete from reminders where id = ?", [row[0]])
         end
     end
 

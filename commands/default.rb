@@ -1,8 +1,8 @@
 require 'command'
 
 class Default < Command
-    def respond(client, time=nil, nick=nil, text=nil)
-        client.send("I am not sure what you're asking...")
+    def respond(client, room, time=nil, nick=nil, text=nil)
+        client.send(room, "I am not sure what you're asking...")
     end
 end
 
