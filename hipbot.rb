@@ -118,7 +118,7 @@ private
             mess = Jabber::Message.new
             mess.to = row[1]
             mess.from = @config['hipchat']['username']
-            mess.body = "Hey, you wanted me to remind you: #{row[3]}"
+            mess.body = "Hey, #{row[3]}"
             mess.set_type(:chat)
             @client.send(mess)
             @db.execute("delete from reminders where id = ?", [row[0]])

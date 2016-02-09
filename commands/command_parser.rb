@@ -7,7 +7,7 @@ require 'die'
 require 'remind'
 
 $commands = {
-    "(hey|hi|hello|what's up|sup|yo|i love you)" => Salute,
+    "(hey|hi|hello|what's up|sup|yo|i love you|welcome back)" => Salute,
     'help' => Help,
     'die' => Die,
     "tell me a(?:nother)? joke" => Jokes,
@@ -17,7 +17,7 @@ $commands = {
     'start build for (\w+(?:[-\w+])?)' => BuildStart,
     'watch build (\w+(?:[-\w+]+))' => BuildWatch,
     'deploy build (\w+(?:[-\w+]))' => BuildDeploy,
-    'remind me (?:of|to)? (.*?) (?:at|on)? (.*)' => Remind,
+    'remind me (?:of|to)? (.*) (at|on|in) (.*)' => Remind,
     '.*' => Default
 }
 
@@ -28,6 +28,7 @@ module CommandParser
         $commands.each do |key, clazz|
             match = text.downcase.match(key)
             if match
+                puts "Matched string: #{match[0]}. Params are: #{match[1,match.length]}"
                 cmd = clazz.new(match[1, match.length])
                 break
             end
