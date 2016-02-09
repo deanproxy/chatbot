@@ -1,0 +1,19 @@
+hipchat:
+    username: username
+    password: password
+    server: chat.hipchat.com
+    conf: conf.btf.hipchat.com
+    nick: Zoolander
+    botname: '@Zoolander'
+    rooms: 
+        - room1
+        - room2
+
+bamboo:
+    url_base: http://build:8085/rest/api/latest
+    username: zoolander
+    password: derek
+
+database:
+    name: 'hipbot.db'
+
