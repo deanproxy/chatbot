@@ -62,8 +62,8 @@ class Bot
                 if text.match("#{@botname} (.*)")
                     begin
                         cmd = CommandParser.parse($1)
-                        cmd.respond(self, room, t, nick, text)
-                    rescue Exception => e
+                        cmd.respond(self, room, t, nick, $1)
+                    rescue => e
                         @log.fatal(e.message)
                         @log.fatal(e.backtrace)
                         @connection_dead = true
