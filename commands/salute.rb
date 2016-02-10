@@ -1,4 +1,4 @@
-require 'command'
+require './commands/command'
 
 class Salute < Command
     def respond(client, room, time=nil, nick=nil, text=nil)

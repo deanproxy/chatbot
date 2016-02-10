@@ -1,4 +1,4 @@
-require 'command'
+require './commands/command'
 require 'net/http'
 require 'json'
 
