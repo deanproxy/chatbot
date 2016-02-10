@@ -1,15 +1,30 @@
-require 'command'
+require './commands/command'
 
 class Remind < Command
     def respond(client, room, time=nil, nick=nil, text=nil)
-        rtime = parse_time(@params[1], @params[2])
-        jid = client.users[nick]['jid']
-        mention = client.users[nick]['mention']
-        client.db.execute("insert into reminders (jid, time, text) values(?, ?, ?)",
-                  [jid.to_s, rtime.to_s, @params[0]])
-        readable_time = rtime.strftime("%m/%d/%Y %l:%M:%S%p")
-        text = "Okay. I've set a reminder for you to #{@params[0]} at #{readable_time}"
-        client.send(room, text, mention)
+        if @params.length == 4
+            # This is probably a room reminder
+            if @params[0] == 'the room' || @params[0] == 'everyone'
+                nick = '@all'
+            else
+                nick = @params[0]
+            end
+            rtime = parse_time(@params[2], @params[3])
+            readable_time = rtime.strftime("%m/%d/%Y %l:%M:%S%p")
+            client.db.execute('insert into reminders(jid, time, text, room) values(?, ?, ?, ?)',
+                             [nick, rtime.to_s, @params[1], room])
+            text = "Okay. I've set a reminder `#{@params[1]}` at #{readable_time}'"
+            client.send(room, text)
+        else
+            rtime = parse_time(@params[1], @params[2])
+            jid = client.users[nick]['jid']
+            mention = client.users[nick]['mention']
+            client.db.execute("insert into reminders (jid, time, text) values(?, ?, ?)",
+                      [jid.to_s, rtime.to_s, @params[0]])
+            readable_time = rtime.strftime("%m/%d/%Y %l:%M:%S%p")
+            text = "Okay. I've set a reminder for you to #{@params[0]} at #{readable_time}"
+            client.send(room, text, mention)
+        end
     end
 
 private

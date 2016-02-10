@@ -1,13 +1,11 @@
-#!/usr/bin/env ruby -I . -I commands
 require 'xmpp4r'
 require 'xmpp4r/muc/helper/simplemucclient'
 require 'xmpp4r/roster'
 require 'yaml'
 require 'sqlite3'
 require 'logger'
-require 'daemons'
 
-require 'commands/command_parser'
+require './commands/command_parser'
 
 class Bot
 
@@ -113,7 +111,6 @@ class Bot
                 sleep(1)
             end
         }.join
-        Daemons.daemonize
     end
 
 private
@@ -122,13 +119,17 @@ private
     end
 
     def check_reminders
-        @db.execute('select id,jid,time,text from reminders where time <= ?', [DateTime.now.to_s]) do |row|
-            mess = Jabber::Message.new
-            mess.to = row[1]
-            mess.from = @config['hipchat']['username']
-            mess.body = "Hey, #{row[3]}"
-            mess.set_type(:chat)
-            @client.send(mess)
+        @db.execute('select id,jid,time,text,room from reminders where time <= ?', [DateTime.now.to_s]) do |row|
+            if row[4]
+                self.send(row[4], "Hey, #{row[1]}, #{row[3]}")
+            else
+                mess = Jabber::Message.new
+                mess.to = row[1]
+                mess.from = @config['hipchat']['username']
+                mess.body = "Hey, #{row[3]}"
+                mess.set_type(:chat)
+                @client.send(mess)
+            end
             @db.execute("delete from reminders where id = ?", [row[0]])
             @log.info("Sent a reminder to #{row[1]}")
         end

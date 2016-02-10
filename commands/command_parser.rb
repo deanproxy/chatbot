@@ -1,14 +1,15 @@
-require 'salute'
-require 'jokes'
-require 'build'
-require 'default'
-require 'help'
-require 'die'
-require 'remind'
 require 'logger'
 
+require './commands/salute'
+require './commands/jokes'
+require './commands/build'
+require './commands/default'
+require './commands/help'
+require './commands/die'
+require './commands/remind'
+
 $commands = {
-    "(hey|hi|hello|what's up|sup|yo|i love you|welcome back)" => Salute,
+    "^(hey|hi|hello|what's up|sup|yo|i love you|welcome back)" => Salute,
     'help' => Help,
     'die' => Die,
     "tell me a(?:nother)? joke" => Jokes,
@@ -19,6 +20,7 @@ $commands = {
     'watch build (\w+(?:[-\w+]+))' => BuildWatch,
     'deploy build (\w+(?:[-\w+]))' => BuildDeploy,
     'remind me (?:of|to)? (.*) (at|on|in) (.*)' => Remind,
+    'remind (\@?\w+)(?:\sthat)? (.*) (at|on|in) (.*)' => Remind,
     '.*' => Default
 }
 
