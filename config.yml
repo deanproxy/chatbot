@@ -7,7 +7,8 @@ hipchat:
     botname: '@Zoolander'
     rooms: 
         - 1_bottest
-#        - 1_#dev
+        - 1_#dev
+        - 1_off_topic
 
 bamboo:
     url_base: http://build.pldev.local:8085/rest/api/latest
