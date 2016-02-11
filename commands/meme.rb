@@ -65,7 +65,10 @@ class Meme < Command
         post_data[:password] = client.config['meme']['password']
 
         uri = URI.parse(url)
-        response = Net::HTTP.post_form(uri, post_data)
+        http = Net::HTTP.new(uri.host)
+        request = Net::HTTP::Post.new(uri.request_uri)
+        request.set_form_data(post_data)
+        response = http.request(request)
         if response.code == '200'
             data = JSON.parse(response.body)
             if data['success']
