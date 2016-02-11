@@ -8,7 +8,7 @@ class Help < Command
             "* start build for _buildkey_\n" +
             "* watch build _buildID_\n" +
             "* tell me a joke\n" +
-            "* make meme ... (run: make meme help)" +
+            "* make meme ... (run: make meme help)\n" +
             "* die (do you really want to hurt me?).")
     end
 end
