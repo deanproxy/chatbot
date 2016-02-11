@@ -11,8 +11,8 @@ require './commands/meme'
 
 $commands = {
     "^(hey|hi|hello|what's up|sup|yo|i love you|welcome back)$" => Salute,
-    'help' => Help,
-    '(?:please\s)?die' => Die,
+    '^help$' => Help,
+    '^(?:please\s)?die$' => Die,
     "tell me a(?:nother)? joke" => Jokes,
     '(?:\w+\s)?build status for (\w+(?:[-\w+])?)' => BuildStatus,
     'alias build (\w+(?:[-\w+])?) (\w+(?:-\w+)?)' => BuildAlias,

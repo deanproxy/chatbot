@@ -2,6 +2,18 @@ require './commands/command'
 require 'net/http'
 
 class Meme < Command
+    def print_help(client, room)
+        client.send(room, "/code Here are the memes I can do:\n" +
+                   "* I don't always ___ but when I do ___\n" +
+                   "* Yo dawg ___ so ___\n" +
+                   "* One does not simply ___\n" +
+                   "* take my money\n" +
+                   "* Not sure if ___ or ___\n" +
+                   "* What if I told you ___\n" +
+                   "* Am I the only one around here ___\n" +
+                   "* ___ Ain't nobody got time for that'")
+    end
+
     def respond(client, room, time=nil, nick=nil, text=nil)
         # Meme ID's come from https://api.imgflip.com/caption_image
         # This should probably be more robust and stored in the db,
@@ -25,7 +37,11 @@ class Meme < Command
             :username => nil,
             :password => nil
         }
-        case text.downcase
+
+        case @params[0].downcase
+        when 'help'
+            print_help(client, room)
+            return
         when /i don't always (.*) but when i do (.*)/
             post_data[:template_id] = @memes[:interesting_man]
             post_data[:text0] = "I don't always #{$1}"
