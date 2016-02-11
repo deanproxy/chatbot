@@ -7,9 +7,10 @@ require './commands/default'
 require './commands/help'
 require './commands/die'
 require './commands/remind'
+require './commands/meme'
 
 $commands = {
-    "^(hey|hi|hello|what's up|sup|yo|i love you|welcome back)" => Salute,
+    "^(hey|hi|hello|what's up|sup|yo|i love you|welcome back)$" => Salute,
     'help' => Help,
     '(?:please\s)?die' => Die,
     "tell me a(?:nother)? joke" => Jokes,
@@ -21,6 +22,7 @@ $commands = {
     'deploy build (\w+(?:[-\w+]))' => BuildDeploy,
     'remind me (?:of|to)? (.*) (at|on|in) (.*)' => Remind,
     'remind (\@?\w+)(?:\sthat)? (.*) (at|on|in) (.*)' => Remind,
+    'make meme (.*)' => Meme,
     '.*' => Default
 }
 

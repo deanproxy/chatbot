@@ -137,6 +137,12 @@ private
 
 end
 
-b = Bot.new
-b.connect.run
+# Make a daemon and run in the background.
+pid = Process.fork
+if pid.nil?
+    b = Bot.new
+    b.connect.run
+else
+    Process.detach(pid)
+end
 

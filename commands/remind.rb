@@ -6,6 +6,9 @@ class Remind < Command
             # This is probably a room reminder
             if @params[0] == 'the room' || @params[0] == 'everyone'
                 nick = '@all'
+            elsif @parms[0] == client.config['hipchat']['botname']
+                client.send(room, "I'm sorry, I can't set reminders for myself.")
+                return
             else
                 nick = @params[0]
             end
