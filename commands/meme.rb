@@ -66,7 +66,7 @@ class Meme < Command
             post_data[:template_id] = @memes[:matrix]
             post_data[:text0] = "What if I told you"
             post_data[:text1] = $1
-        when /am i then only one around here (.*)/
+        when /am i the only one around here (.*)/
             post_data[:template_id] = @memes[:onlyone]
             post_data[:text0] = 'Am I the only one around here'
             post_data[:text1] = $1
