@@ -40,6 +40,8 @@ class Meme < Command
             post_data[:text1] = $1
         when /take my money/
             post_data[:template_id] = @memes[:takemoney]
+            post_data[:text0] = 'Shut up and'
+            post_data[:text1] = 'take my money!'
         when /not sure if (.*) or (.*)/
             post_data[:template_id] = @memes[:notsure]
             post_data[:text0] = "Not sure if #{$1}"
