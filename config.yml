@@ -1,19 +1,23 @@
 hipchat:
-    username: 1_22@chat.btf.hipchat.com
-    password: zoolander bot
-    server: hipchat.pamlabdev.com
-    conf: conf.btf.hipchat.com
-    nick: Zoolander
-    botname: '@Zoolander'
+    username: username
+    password: password
+    server: chat.hipchat.com
+    conf: conf.hipchat.com
+    nick: My Nick
+    botname: '@mynick'
     rooms: 
-        - 1_bottest
-#        - 1_#dev
+        - room1
+        - room2
 
 bamboo:
-    url_base: http://build.pldev.local:8085/rest/api/latest
-    username: zoolander
-    password: zoolander bot
+    url_base: http://build:8085/rest/api/latest
+    username: username
+    password: password
 
 database:
     name: 'hipbot.db'
 
+meme:
+    post_url: https://api.imgflip.com/caption_image
+    username: username
+    password: password
