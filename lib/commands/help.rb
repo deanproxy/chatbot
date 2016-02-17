@@ -1,4 +1,4 @@
-require "./lib/commands/command"
+require_relative 'command'
 
 class Help < Command
     def respond(client, room, time=nil, nick=nil, text=nil)

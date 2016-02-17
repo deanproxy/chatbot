@@ -1,2 +1,2 @@
 require 'test/unit'
-require "./test/remind_test.rb"
+require_relative 'remind_test.rb'

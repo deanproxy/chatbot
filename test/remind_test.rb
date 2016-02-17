@@ -1,7 +1,7 @@
 require 'test/unit'
 
-require "./test/client_mockup"
-require "./lib/commands/remind.rb"
+require_relative 'client_mockup'
+require_relative "../lib/commands/remind.rb"
 
 class RemindTest < Test::Unit::TestCase
     def setup
