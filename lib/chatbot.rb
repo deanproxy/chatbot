@@ -7,13 +7,13 @@ require 'sqlite3'
 require 'logger'
 require 'optparse'
 
-require "./lib/commands/command_parser"
-require "./lib/commands/remind"
+require_relative 'commands/command_parser'
+require_relative 'commands/remind'
 
 class Bot
 
     def initialize(options)
-        @config = YAML::load_file(options[:config] || 'config.yml')
+        @config = YAML::load_file(options[:config] || '../config.yml')
         @connection_dead = false
         @nick = @config['hipchat']['nick']
         @botname = @config['hipchat']['botname']
