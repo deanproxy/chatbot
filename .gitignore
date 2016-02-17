@@ -1,4 +1,5 @@
-hipbot.db
-hipbot.log
+*.db
+*.log
 config.real.yml
 Gemfile.lock
+bot.pid
