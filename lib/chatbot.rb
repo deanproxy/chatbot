@@ -5,10 +5,10 @@ require 'xmpp4r/roster'
 require 'yaml'
 require 'sqlite3'
 require 'logger'
-require 'optsparse'
+require 'optparse'
 
-require './commands/command_parser'
-require './commands/remind'
+require "./lib/commands/command_parser"
+require "./lib/commands/remind"
 
 class Bot
 
@@ -118,7 +118,7 @@ class Bot
 end
 
 options = {}
-OptionsParser.new do |opts|
+OptionParser.new do |opts|
     opts.banner = "Usage: bot --config=configfile"
 	opts.on("-c", "--config", "Location of your YML config file.") do |v|
         options[:config] = v

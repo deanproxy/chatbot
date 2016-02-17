@@ -1,4 +1,4 @@
-require './commands/command'
+require "./lib/commands/command"
 
 class Remind < Command
     def respond(client, room, time=nil, nick=nil, text=nil)
