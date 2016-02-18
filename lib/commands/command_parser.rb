@@ -19,7 +19,7 @@ $commands = {
     'start build for (\w+(?:[-\w+])?)' => BuildStart,
     'watch build (\w+(?:[-\w+]+))' => BuildWatch,
     'deploy build (\w+(?:[-\w+]))' => BuildDeploy,
-    'remind me (?:of|to)? (.*) (at|on|in) (.*)' => Remind,
+    'remind me (?:that|of|to)? (.*) (at|on|in) (.*)' => Remind,
     'remind (\@\w+) (?:\sthat|of|to)? (.*) (at|on|in) (.*)' => Remind,
     '.*' => Default
 }
