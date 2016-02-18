@@ -20,7 +20,7 @@ class Bot
         @users = {}
         @rooms = {}
         @db = SQLite3::Database.new(@config['database']['name'])
-        @log = Logger.new('hipbot.log')
+        @log = Logger.new('chatbot.log')
     end
 
     def config
