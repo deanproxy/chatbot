@@ -1,4 +1,4 @@
-require './commands/command'
+require_relative 'command'
 
 class Jokes < Command
     def respond(client, room, time=nil, nick=nil, text=nil)

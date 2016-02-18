@@ -2,21 +2,33 @@ require './commands/command'
 
 class Remind < Command
     def respond(client, room, time=nil, nick=nil, text=nil)
-        if @params.length == 4
-            # This is probably a room reminder
-            if @params[0] == 'the room' || @params[0] == 'everyone'
-                nick = '@all'
-            elsif @params[0] == client.config['hipchat']['botname']
+        if @params.length == 5
+            # Don't allow reminders to self.
+            if @params[0] == client.config['hipchat']['botname']
                 client.send(room, "I'm sorry, I can't set reminders for myself.")
                 return
-            else
-                nick = @params[0]
             end
-            rtime = parse_time(@params[2], @params[3])
-            readable_time = rtime.strftime("%m/%d/%Y %l:%M:%S%p")
+            nick = params[0]
+
+            # Transform certain nouns so it sounds appropriate
+            # when sending the reminder.
+            message = @params[2]
+            if @params[1]
+                case @params[1].downcase
+                when /^(he|she)$/
+                    message = "you #{@params[2]}"
+                when /^(he\'s|she\'s)$/
+                    message = "you're #{@params[2]}"
+                else
+                    term = @params[2]
+                end
+            end
+
+            rtime = parse_time(@params[3], @params[4])
+            readable_time = rtime.strftime("%m/%d/%Y %l:%M%p")
             client.db.execute('insert into reminders(jid, time, text, room) values(?, ?, ?, ?)',
-                             [nick, rtime.to_s, @params[1], room])
-            text = "Okay. I've set a reminder `#{@params[1]}` at #{readable_time}'"
+                             [nick, rtime.to_s, message, room])
+            text = "Okay. I've set a reminder `#{message}` at #{readable_time}"
             client.send(room, text)
         else
             rtime = parse_time(@params[1], @params[2])
@@ -24,7 +36,7 @@ class Remind < Command
             mention = client.users[nick]['mention']
             client.db.execute("insert into reminders (jid, time, text) values(?, ?, ?)",
                       [jid.to_s, rtime.to_s, @params[0]])
-            readable_time = rtime.strftime("%m/%d/%Y %l:%M:%S%p")
+            readable_time = rtime.strftime("%m/%d/%Y %l:%M%p")
             text = "Okay. I've set a reminder for you to #{@params[0]} at #{readable_time}"
             client.send(room, text, mention)
         end

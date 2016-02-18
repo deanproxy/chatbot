@@ -1,4 +1,4 @@
-require './commands/command'
+require_relative 'command'
 
 class Die < Command
     def respond(client, room, time=nil, nick=nil, text=nil)
