@@ -3,16 +3,10 @@ require_relative 'command'
 class Remind < Command
     def respond(client, room, time=nil, nick=nil, text=nil)
         if @params.length == 4
-            # This is probably a room reminder
-            if @params[0] == 'the room' || @params[0] == 'everyone'
-                nick = '@all'
-            else
-                nick = @params[0]
-            end
             rtime = parse_time(@params[2], @params[3])
             readable_time = rtime.strftime("%m/%d/%Y %l:%M%p")
             client.db.execute('insert into reminders(jid, time, text, room) values(?, ?, ?, ?)',
-                             [nick, rtime.to_s, @params[1], room])
+                             [params[0], rtime.to_s, @params[1], room])
             text = "Okay. I've set a reminder `#{@params[1]}` at #{readable_time}"
             client.send(room, text)
         else
@@ -22,7 +16,7 @@ class Remind < Command
             client.db.execute("insert into reminders (jid, time, text) values(?, ?, ?)",
                       [jid.to_s, rtime.to_s, @params[0]])
             readable_time = rtime.strftime("%m/%d/%Y %l:%M%p")
-            text = "Okay. I've set a reminder for you to #{@params[0]} at #{readable_time}"
+            text = "Okay. I've set a reminder for you to `#{@params[0]}` at #{readable_time}"
             client.send(room, text, mention)
         end
     end

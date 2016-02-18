@@ -20,7 +20,7 @@ $commands = {
     'watch build (\w+(?:[-\w+]+))' => BuildWatch,
     'deploy build (\w+(?:[-\w+]))' => BuildDeploy,
     'remind me (?:of|to)? (.*) (at|on|in) (.*)' => Remind,
-    'remind (\@?\w+)(?:\sthat)? (.*) (at|on|in) (.*)' => Remind,
+    'remind (\@\w+) (?:\sthat|of|to)? (.*) (at|on|in) (.*)' => Remind,
     '.*' => Default
 }
 
@@ -28,7 +28,7 @@ $commands = {
 module CommandParser
     def CommandParser.parse(text)
         cmd = nil
-        log = Logger.new('hipbot.log')
+        log = Logger.new('chatbot.log')
         $commands.each do |key, clazz|
             match = text.downcase.match(key)
             if match

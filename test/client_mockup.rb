@@ -14,11 +14,16 @@ class ClientMockup
         return @config
     end
 
+    def users
+        return @users
+    end
+
     def initialize(options={})
         @config = options
         @log = Logger.new($stdout)
         @db = SQLite3::Database.new('test.db')
         @last_send_msg = []
+        @users = options[:users] || {}
 
         File.open("./schema/schema.sql") do |f|
             @db.execute(f.read())
