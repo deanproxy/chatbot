@@ -1,6 +1,7 @@
-require './commands/command'
 require 'net/http'
 require 'json'
+
+require_relative 'command'
 
 def get_build_alias(db, build_alias)
     bamboo_id = nil

@@ -1,4 +1,4 @@
-require './commands/command'
+require_relative 'command'
 
 class Default < Command
     def respond(client, room, time=nil, nick=nil, text=nil)
@@ -13,6 +13,8 @@ class Default < Command
             case text.downcase
             when /hansel(.*)/
                 client.send(room, "I hate Hansel! Everywhere I look, Hansel, Hansel, Hansel!")
+            when /^can you(.*)/
+                client.send(room, "I can do a lot of things. Try asking for help.")
             else
                 client.send(room, quotes[Random.rand(quotes.length-1)])
             end

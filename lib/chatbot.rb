@@ -1,39 +1,27 @@
+#!/usr/bin/env ruby
 require 'xmpp4r'
 require 'xmpp4r/muc/helper/simplemucclient'
 require 'xmpp4r/roster'
 require 'yaml'
 require 'sqlite3'
 require 'logger'
+require 'optparse'
 
-require './commands/command_parser'
+require_relative 'commands/command_parser'
+require_relative 'commands/remind'
 
 class Bot
+    attr_reader :config, :users, :db, :log
 
-    def initialize
-        load_config
+    def initialize(options)
+        @config = YAML::load_file(options[:config] || '../config.yml')
         @connection_dead = false
         @nick = @config['hipchat']['nick']
         @botname = @config['hipchat']['botname']
         @users = {}
         @rooms = {}
         @db = SQLite3::Database.new(@config['database']['name'])
-        @log = Logger.new('hipbot.log')
-    end
-
-    def config
-        return @config
-    end
-
-    def users
-        return @users
-    end
-
-    def db
-        return @db
-    end
-
-    def log
-        return @log
+        @log = Logger.new('chatbot.log')
     end
 
     def connect
@@ -107,42 +95,26 @@ class Bot
                     end
                     exit
                 end
-                check_reminders
+                Remind.check_reminders(self)
                 sleep(1)
             end
         }.join
     end
-
-private
-    def load_config
-        @config = YAML.load_file('config.yml')
-    end
-
-    def check_reminders
-        @db.execute('select id,jid,time,text,room from reminders where time <= ?', [DateTime.now.to_s]) do |row|
-            if row[4]
-                self.send(row[4], "Hey, #{row[1]}, #{row[3]}")
-            else
-                mess = Jabber::Message.new
-                mess.to = row[1]
-                mess.from = @config['hipchat']['username']
-                mess.body = "Hey, #{row[3]}"
-                mess.set_type(:chat)
-                @client.send(mess)
-            end
-            @db.execute("delete from reminders where id = ?", [row[0]])
-            @log.info("Sent a reminder to #{row[1]}")
-        end
-    end
-
 end
 
-# Make a daemon and run in the background.
-pid = Process.fork
-if pid.nil?
-    b = Bot.new
+options = {}
+OptionParser.new do |opts|
+    opts.banner = "Usage: bot --config=configfile"
+	opts.on("-c", "--config", "Location of your YML config file.") do |v|
+        options[:config] = v
+    end
+end
+
+pid = fork {
+    b = Bot.new(options)
     b.connect.run
-else
-    Process.detach(pid)
+}
+File.open("bot.pid", "w") do |f|
+    f.write(pid)
 end
 

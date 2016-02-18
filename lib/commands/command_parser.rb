@@ -21,7 +21,7 @@ $commands = {
     'watch build (\w+(?:[-\w+]+))' => BuildWatch,
     'deploy build (\w+(?:[-\w+]))' => BuildDeploy,
     'remind me (?:of|to)? (.*) (at|on|in) (.*)' => Remind,
-    'remind (\@?\w+)(?:\sthat)? (.*) (at|on|in) (.*)' => Remind,
+    'remind (\@\w+)(?:\s(?:of|about|to|that?))?(?:\s(he|she|his|her|she\'s|he\'s))? (.*) (at|in|on) (.*)' => Remind,
     'make meme (.*)' => Meme,
     '.*' => Default
 }

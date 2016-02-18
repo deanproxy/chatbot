@@ -1,4 +1,4 @@
-require './commands/command'
+require_relative 'command'
 
 class Help < Command
     def respond(client, room, time=nil, nick=nil, text=nil)
@@ -8,7 +8,6 @@ class Help < Command
             "* start build for _buildkey_\n" +
             "* watch build _buildID_\n" +
             "* tell me a joke\n" +
-            "* make meme ... (run: make meme help)\n" +
             "* die (do you really want to hurt me?).")
     end
 end
