@@ -11,6 +11,7 @@ require_relative 'commands/command_parser'
 require_relative 'commands/remind'
 
 class Bot
+    attr_reader :config, :users, :db, :log
 
     def initialize(options)
         @config = YAML::load_file(options[:config] || '../config.yml')
@@ -21,22 +22,6 @@ class Bot
         @rooms = {}
         @db = SQLite3::Database.new(@config['database']['name'])
         @log = Logger.new('chatbot.log')
-    end
-
-    def config
-        return @config
-    end
-
-    def users
-        return @users
-    end
-
-    def db
-        return @db
-    end
-
-    def log
-        return @log
     end
 
     def connect

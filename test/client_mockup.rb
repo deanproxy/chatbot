@@ -2,21 +2,7 @@ require 'sqlite3'
 require 'logger'
 
 class ClientMockup
-    def db
-        return @db
-    end
-
-    def log
-        return @log
-    end
-
-    def config
-        return @config
-    end
-
-    def users
-        return @users
-    end
+    attr_reader :db, :log, :config, :users
 
     def initialize(options={})
         @config = options
