@@ -1,13 +1,13 @@
 require 'logger'
 
-require './commands/salute'
-require './commands/jokes'
-require './commands/build'
-require './commands/default'
-require './commands/help'
-require './commands/die'
-require './commands/remind'
-require './commands/meme'
+require_relative 'salute'
+require_relative 'jokes'
+require_relative 'build'
+require_relative 'default'
+require_relative 'help'
+require_relative 'die'
+require_relative 'remind'
+require_relative 'meme'
 
 $commands = {
     "^(hey|hi|hello|what's up|sup|yo|i love you|welcome back)$" => Salute,
