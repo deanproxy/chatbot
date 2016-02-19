@@ -1,4 +1,4 @@
-require './commands/command'
+require_relative 'command'
 
 class Remind < Command
     def respond(client, room, time=nil, nick=nil, text=nil)
@@ -37,7 +37,7 @@ class Remind < Command
             client.db.execute("insert into reminders (jid, time, text) values(?, ?, ?)",
                       [jid.to_s, rtime.to_s, @params[0]])
             readable_time = rtime.strftime("%m/%d/%Y %l:%M%p")
-            text = "Okay. I've set a reminder for you to #{@params[0]} at #{readable_time}"
+            text = "Okay. I've set a reminder for you to `#{@params[0]}` at #{readable_time}"
             client.send(room, text, mention)
         end
     end
