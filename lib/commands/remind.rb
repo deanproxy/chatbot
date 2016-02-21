@@ -13,15 +13,37 @@ class Remind < Command
             # Transform certain nouns so it sounds appropriate
             # when sending the reminder.
             message = @params[2]
-            if @params[1]
-                case @params[1].downcase
+            noun = @params[1] || ''
+            if noun.length
+                case noun.downcase
                 when /^(he|she)$/
-                    message = "you #{@params[2]}"
+                    noun = "you"
                 when /^(he\'s|she\'s)$/
-                    message = "you're #{@params[2]}"
-                else
-                    term = @params[2]
+                    noun = "you're"
                 end
+
+                # Transform verb
+                matches = @params[2].match("([A-Za-z']+) (.*)")
+                verb = ''
+                if matches
+                    verb = matches[1]
+                    case verb
+                    when 'needs'
+                        verb = 'need'
+                    when 'wants'
+                        verb = 'want'
+                    when 'has'
+                        verb = 'have'
+                    when 'is'
+                        verb = 'are'
+                    when "hasn't"
+                        verb = "haven't"
+                    end
+                    message = "#{noun} #{verb} #{matches[2]}"
+                else
+                    message = "#{noun}#{@params[2]}"
+                end
+
             end
 
             rtime = parse_time(@params[3], @params[4])
