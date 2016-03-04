@@ -4,3 +4,4 @@ config.real.yml
 Gemfile.lock
 bot.pid
 *.bak
+*.pyc
