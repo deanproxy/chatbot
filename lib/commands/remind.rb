@@ -1,6 +1,23 @@
 require_relative 'command'
 
 class Remind < Command
+    def check_reminders(client)
+        @db.execute('select id,jid,time,text,room from reminders where time <= ?', [DateTime.now.to_s]) do |row|
+            if row[4]
+                client.send(row[4], "Hey, #{row[1]}, #{row[3]}")
+            else
+                mess = Jabber::Message.new
+                mess.to = row[1]
+                mess.from = @config['hipchat']['username']
+                mess.body = "Hey, #{row[3]}"
+                mess.set_type(:chat)
+                client.send(mess)
+            end
+            client.db.execute("delete from reminders where id = ?", [row[0]])
+            client.log.info("Sent a reminder to #{row[1]}")
+        end
+    end
+
     def respond(client, room, time=nil, nick=nil, text=nil)
         if @params.length == 5
             # Don't allow reminders to self.
