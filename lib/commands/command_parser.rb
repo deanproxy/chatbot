@@ -22,8 +22,8 @@ $commands = {
     '^(?:^\/)?deploy (?:build )?(\w+(?:[-\w+]))' => BuildDeploy,
     '^(?:^\/)?remind me (?:of|to)? (.*) (at|on|in) (.*)' => Remind,
     '^(?:^\/)?remind (\@\w+)(?:\s(?:of|about|to|that?))?(?:\s(he|she|his|her|she\'s|he\'s))? (.*) (at|in|on) (.*)' => Remind,
-    '^(?:(?:make )?(?:^\/)?meme) (.*)' => Meme,
-    '.*' => Default
+    '^(?:(?:make )?(?:\/)?meme)(?: (.*)?)?' => Meme,
+    '^(?:^\/)?quote' => Default
 }
 
 
@@ -34,8 +34,10 @@ module CommandParser
         $commands.each do |key, clazz|
             match = text.downcase.match(key)
             if match
+                log.debug("Text matched was: #{text}")
                 log.debug("Matched string: #{match[0]}. Params are: #{match[1,match.length]}")
                 cmd = clazz.new(match[1, match.length])
+                log.debug("The class we got from this match is: #{cmd.class}")
                 break
             end
         end

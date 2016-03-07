@@ -3,8 +3,8 @@ require_relative 'command'
 
 class Meme < Command
     def print_help(client, room)
-        client.send(room, "/code Here are the memes I can do:\n" +
-                   "* I don't always ___ but when I do ___\n" +
+        client.send(room, "Here are the memes I can do:")
+        client.send(room, "/code * I don't always ___ but when I do ___\n" +
                    "* Yo dawg ___ so ___\n" +
                    "* One does not simply ___\n" +
                    "* take my money\n" +
@@ -38,10 +38,12 @@ class Meme < Command
             :password => nil
         }
 
-        case @params[0].downcase
-        when 'help'
+        if not @params[0]
             print_help(client, room)
             return
+        end
+
+        case @params[0].downcase
         when /i don't always (.*) but when i do (.*)/
             post_data[:template_id] = @memes[:interesting_man]
             post_data[:text0] = "I don't always #{$1}"
@@ -74,6 +76,12 @@ class Meme < Command
             post_data[:template_id] = @memes[:notime]
             post_data[:text0] = $1
             post_data[:text1] = "Ain't nobody got time for that!"
+        when 'help'
+            print_help(client, room)
+            return
+        else
+            print_help(client, room)
+            return
         end
 
         url = client.config['meme']['post_url']

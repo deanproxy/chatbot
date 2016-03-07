@@ -14,7 +14,7 @@ class Bot
     attr_reader :config, :users, :db, :log
 
     def initialize(options)
-        @config = YAML::load_file(options[:config] || '../config.yml')
+        @config = YAML::load_file(options[:config] || 'config.yml')
         @connection_dead = false
         @nick = @config['hipchat']['nick']
         @botname = @config['hipchat']['botname']
@@ -47,10 +47,12 @@ class Bot
             @rooms[room].on_message do |time, nick, text|
                 t = (time || Time.new).strftime("%I:%M")
                 # Make sure they're talking to us.
-                if text.match("#{@botname} (.*)") || text.match("^\/(.*)")
+                if nick != @config['hipchat']['nick'] && (text.match("^#{@botname} (.*)") || text.match("^(\/.*)"))
                     begin
                         cmd = CommandParser.parse($1)
-                        cmd.respond(self, room, t, nick, $1)
+                        if cmd
+                            cmd.respond(self, room, t, nick, $1)
+                        end
                     rescue => e
                         @log.fatal(e.message)
                         @log.fatal(e.backtrace)
@@ -76,6 +78,10 @@ class Bot
         self
     end
 
+    def send_message(message)
+        @client.send(message)
+    end
+
     def send(room, text, mention=nil)
         if mention 
             text = "@#{mention} #{text}"
@@ -95,7 +101,7 @@ class Bot
                     end
                     exit
                 end
-                Remind.check_reminders(self)
+                Remind::check_reminders(self)
                 sleep(1)
             end
         }.join
