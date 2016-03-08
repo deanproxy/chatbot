@@ -35,6 +35,18 @@ class ParserTest < MiniTest::Test
         a = CommandParser::parse('meow /start build for MEOW-MIX')
         assert_nil(a)
 
+        a = CommandParser::parse('/status MEOW-MIX')
+        refute_nil(a)
+        assert_instance_of(Build, a)
+        a = CommandParser::parse('get build status for MEOW-MIX')
+        refute_nil(a)
+        assert_instance_of(Build, a)
+        a = CommandParser::parse('build status for MEOW-MIX')
+        refute_nil(a)
+        assert_instance_of(Build, a)
+        a = CommandParser::parse('meow /status MEOW-MIX')
+        assert_nil(a)
+
         a = CommandParser::parse('/alias meow MEOW-MIX')
         refute_nil(a)
         assert_instance_of(Build, a)
