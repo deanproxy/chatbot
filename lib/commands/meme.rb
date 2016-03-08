@@ -15,6 +15,11 @@ class Meme < Command
     end
 
     def respond(client, room, time=nil, nick=nil, text=nil)
+        if not client.config.has_key?('meme')
+            client.send(room, "Sorry, I'm not configured to do meme's. Check my config.")
+            return
+        end
+
         # Meme ID's come from https://api.imgflip.com/caption_image
         # This should probably be more robust and stored in the db,
         # but I'm kinda lazy right now...
