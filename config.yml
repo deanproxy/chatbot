@@ -1,0 +1,23 @@
+xmpp:
+    username: username
+    password: password
+    server: chat.server.com
+    conf: conf.server.com
+    nick: My Nickname
+    botname: '@mynick'
+    rooms: 
+        - room1
+        - room2
+
+bamboo:
+    url_base: http://build:8085/rest/api/latest
+    username: username
+    password: password
+
+database:
+    name: 'chatbot.db'
+
+meme:
+    post_url: https://api.imgflip.com/caption_image
+    username: username 
+    password: password
