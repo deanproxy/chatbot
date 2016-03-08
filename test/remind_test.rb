@@ -8,7 +8,7 @@ require_relative '../lib/commands/default'
 class RemindTest < MiniTest::Test
     def setup
         @client = ClientMockup.new({
-            'hipchat' => {
+            'xmpp' => {
                 'botname' => '@test'
             },
             :users => {
@@ -29,7 +29,7 @@ class RemindTest < MiniTest::Test
         # Test a failure. If the person is not saying "remind me" or "remind @someuser" 
         # it should go to the default parser.
         a = CommandParser::parse('remind some guy to say hi in 1 minute')
-        assert_equal(a.class, Default)
+        assert_nil(a)
 
         # Test setting a reminder to ourself
         a = CommandParser::parse('remind @test that he is great in 1 minute')

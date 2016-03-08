@@ -2,7 +2,7 @@ require_relative 'command'
 
 class Help < Command
     def respond(client, room, time=nil, nick=nil, text=nil)
-        mynick = client.config['hipchat']['botname']
+        mynick = client.config['xmpp']['botname']
 	client.send(room, "You can talk to me using commands, or speaking to me directly with #{mynick}")
         client.send(room, 'Here is a list of things I can do...')
 	client.send(room, "/code " +

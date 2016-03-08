@@ -8,7 +8,7 @@ class Remind < Command
             else
                 mess = Jabber::Message.new
                 mess.to = row[1]
-                mess.from = client.config['hipchat']['username']
+                mess.from = client.config['xmpp']['username']
                 mess.body = "Hey, #{row[3]}"
                 mess.set_type(:chat)
                 client.send_message(mess)
@@ -21,7 +21,7 @@ class Remind < Command
     def respond(client, room, time=nil, nick=nil, text=nil)
         if @params.length == 5
             # Don't allow reminders to self.
-            if @params[0] == client.config['hipchat']['botname']
+            if @params[0] == client.config['xmpp']['botname']
                 client.send(room, "I'm sorry, I can't set reminders for myself.")
                 return
             end

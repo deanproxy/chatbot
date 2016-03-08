@@ -16,8 +16,8 @@ class Bot
     def initialize(options)
         @config = YAML::load_file(options[:config] || 'config.yml')
         @connection_dead = false
-        @nick = @config['hipchat']['nick']
-        @botname = @config['hipchat']['botname']
+        @nick = @config['xmpp']['nick']
+        @botname = @config['xmpp']['botname']
         @users = {}
         @rooms = {}
         @db = SQLite3::Database.new(@config['database']['name'])
