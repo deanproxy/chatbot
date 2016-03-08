@@ -15,6 +15,11 @@ class Meme < Command
     end
 
     def respond(client, room, time=nil, nick=nil, text=nil)
+        if not client.config.has_key?('meme')
+            client.send(room, "Sorry, I'm not configured to do meme's. Check my config.")
+            return
+        end
+
         # Meme ID's come from https://api.imgflip.com/caption_image
         # This should probably be more robust and stored in the db,
         # but I'm kinda lazy right now...
@@ -38,12 +43,12 @@ class Meme < Command
             :password => nil
         }
 
-        if not @params[0]
+        if not @params[1]
             print_help(client, room)
             return
         end
 
-        case @params[0].downcase
+        case @params[1].downcase
         when /i don't always (.*) but when i do (.*)/
             post_data[:template_id] = @memes[:interesting_man]
             post_data[:text0] = "I don't always #{$1}"

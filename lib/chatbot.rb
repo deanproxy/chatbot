@@ -16,8 +16,8 @@ class Bot
     def initialize(options)
         @config = YAML::load_file(options[:config] || 'config.yml')
         @connection_dead = false
-        @nick = @config['hipchat']['nick']
-        @botname = @config['hipchat']['botname']
+        @nick = @config['xmpp']['nick']
+        @botname = @config['xmpp']['botname']
         @users = {}
         @rooms = {}
         @db = SQLite3::Database.new(@config['database']['name'])
@@ -25,10 +25,10 @@ class Bot
     end
 
     def connect
-        @client = Jabber::Client.new(@config['hipchat']['username'])
+        @client = Jabber::Client.new(@config['xmpp']['username'])
 
-        @client.connect(@config['hipchat']['server'])
-        @client.auth(@config['hipchat']['password'])
+        @client.connect(@config['xmpp']['server'])
+        @client.auth(@config['xmpp']['password'])
         @client.send(Jabber::Presence.new.set_type(:available))
 
         @roster = Jabber::Roster::Helper.new(@client)
@@ -40,14 +40,14 @@ class Bot
             }
         end
 
-        @config['hipchat']['rooms'].each do |room|
+        @config['xmpp']['rooms'].each do |room|
             @rooms[room] = Jabber::MUC::SimpleMUCClient.new(@client)
-            @rooms[room].join("#{room}@#{@config['hipchat']['conf']}/#{@config['hipchat']['nick']}", 
+            @rooms[room].join("#{room}@#{@config['xmpp']['conf']}/#{@config['xmpp']['nick']}", 
                       nil, {:history => false})
             @rooms[room].on_message do |time, nick, text|
                 t = (time || Time.new).strftime("%I:%M")
                 # Make sure they're talking to us.
-                if nick != @config['hipchat']['nick'] && (text.match("^#{@botname} (.*)") || text.match("^(\/.*)"))
+                if nick != @config['xmpp']['nick'] && (text.match("^#{@botname} (.*)") || text.match("^(\/.*)"))
                     begin
                         cmd = CommandParser.parse($1)
                         if cmd

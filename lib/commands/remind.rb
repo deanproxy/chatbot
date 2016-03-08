@@ -8,7 +8,7 @@ class Remind < Command
             else
                 mess = Jabber::Message.new
                 mess.to = row[1]
-                mess.from = client.config['hipchat']['username']
+                mess.from = client.config['xmpp']['username']
                 mess.body = "Hey, #{row[3]}"
                 mess.set_type(:chat)
                 client.send_message(mess)
@@ -19,18 +19,18 @@ class Remind < Command
     end
 
     def respond(client, room, time=nil, nick=nil, text=nil)
-        if @params.length == 5
+        if @params.length == 6
             # Don't allow reminders to self.
-            if @params[0] == client.config['hipchat']['botname']
+            if @params[1] == client.config['xmpp']['botname']
                 client.send(room, "I'm sorry, I can't set reminders for myself.")
                 return
             end
-            nick = params[0]
+            nick = params[1]
 
             # Transform certain nouns so it sounds appropriate
             # when sending the reminder.
-            message = @params[2]
-            noun = @params[1] || ''
+            message = @params[3]
+            noun = @params[2] || ''
             if noun.length
                 case noun.downcase
                 when /^(he|she)$/
@@ -40,7 +40,7 @@ class Remind < Command
                 end
 
                 # Transform verb
-                matches = @params[2].match("([A-Za-z']+) (.*)")
+                matches = @params[3].match("([A-Za-z']+) (.*)")
                 verb = ''
                 if matches
                     verb = matches[1]
@@ -58,25 +58,25 @@ class Remind < Command
                     end
                     message = "#{noun} #{verb} #{matches[2]}"
                 else
-                    message = "#{noun}#{@params[2]}"
+                    message = "#{noun}#{@params[3]}"
                 end
 
             end
 
-            rtime = parse_time(@params[3], @params[4])
+            rtime = parse_time(@params[4], @params[5])
             readable_time = rtime.strftime("%m/%d/%Y %l:%M%p")
             client.db.execute('insert into reminders(jid, time, text, room) values(?, ?, ?, ?)',
                              [nick, rtime.to_s, message, room])
             text = "Okay. I've set a reminder `#{message}` at #{readable_time}"
             client.send(room, text)
         else
-            rtime = parse_time(@params[1], @params[2])
+            rtime = parse_time(@params[2], @params[3])
             jid = client.users[nick]['jid']
             mention = client.users[nick]['mention']
             client.db.execute("insert into reminders (jid, time, text) values(?, ?, ?)",
-                      [jid.to_s, rtime.to_s, @params[0]])
+                      [jid.to_s, rtime.to_s, @params[1]])
             readable_time = rtime.strftime("%m/%d/%Y %l:%M%p")
-            text = "Okay. I've set a reminder for you to `#{@params[0]}` at #{readable_time}"
+            text = "Okay. I've set a reminder for you to `#{@params[1]}` at #{readable_time}"
             client.send(room, text, mention)
         end
     end

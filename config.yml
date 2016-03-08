@@ -1,8 +1,8 @@
-hipchat:
+xmpp:
     username: username
     password: password
-    server: chat.hipchat.com
-    conf: conf.hipchat.com
+    server: chat.server.com
+    conf: conf.server.com
     nick: My Nickname
     botname: '@mynick'
     rooms: 
@@ -15,7 +15,7 @@ bamboo:
     password: password
 
 database:
-    name: 'hipbot.db'
+    name: 'chatbot.db'
 
 meme:
     post_url: https://api.imgflip.com/caption_image

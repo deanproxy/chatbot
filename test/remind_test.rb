@@ -8,7 +8,7 @@ require_relative '../lib/commands/default'
 class RemindTest < MiniTest::Test
     def setup
         @client = ClientMockup.new({
-            'hipchat' => {
+            'xmpp' => {
                 'botname' => '@test'
             },
             :users => {
@@ -29,24 +29,24 @@ class RemindTest < MiniTest::Test
         # Test a failure. If the person is not saying "remind me" or "remind @someuser" 
         # it should go to the default parser.
         a = CommandParser::parse('remind some guy to say hi in 1 minute')
-        assert_equal(a.class, Default)
+        assert_nil(a)
 
         # Test setting a reminder to ourself
         a = CommandParser::parse('remind @test that he is great in 1 minute')
         assert_equal(a.class, Remind)
-        assert_equal(a.params[0], '@test')
-        assert_equal(a.params[1], 'he')
-        assert_equal(a.params[2], 'is great')
-        assert_equal(a.params[3], 'in')
-        assert_equal(a.params[4], '1 minute')
+        assert_equal(a.params[1], '@test')
+        assert_equal(a.params[2], 'he')
+        assert_equal(a.params[3], 'is great')
+        assert_equal(a.params[4], 'in')
+        assert_equal(a.params[5], '1 minute')
         a.respond(@client, 'bobroom')
         assert_equal(@client.last_send_msg[0], "I'm sorry, I can't set reminders for myself.")
 
         a = CommandParser::parse('remind me to pee in 3 minutes')
         assert_equal(a.class, Remind)
-        assert_equal(a.params[0], 'pee')
-        assert_equal(a.params[1], 'in')
-        assert_equal(a.params[2], '3 minutes')
+        assert_equal(a.params[1], 'pee')
+        assert_equal(a.params[2], 'in')
+        assert_equal(a.params[3], '3 minutes')
         t = Time.new
         t = t + 180 
         rtime = DateTime.parse(t.to_s)
@@ -64,11 +64,11 @@ class RemindTest < MiniTest::Test
 
         a = CommandParser::parse('remind @tom he needs to pee at 12/10/2020 1:15pm')
         assert_equal(a.class, Remind)
-        assert_equal(a.params[0], '@tom')
-        assert_equal(a.params[1], 'he')
-        assert_equal(a.params[2], 'needs to pee')
-        assert_equal(a.params[3], 'at')
-        assert_equal(a.params[4], '12/10/2020 1:15pm')
+        assert_equal(a.params[1], '@tom')
+        assert_equal(a.params[2], 'he')
+        assert_equal(a.params[3], 'needs to pee')
+        assert_equal(a.params[4], 'at')
+        assert_equal(a.params[5], '12/10/2020 1:15pm')
         a.respond(@client, 'bobroom')
         t = Time.new(2020, 10, 12, 13, 15)
         rtime = DateTime.parse(t.to_s)
@@ -86,11 +86,11 @@ class RemindTest < MiniTest::Test
 
         a = CommandParser::parse('remind @bob he needs to pee on 12/10/2020 2:00pm')
         assert_equal(a.class, Remind)
-        assert_equal(a.params[0], '@bob')
-        assert_equal(a.params[1], 'he')
-        assert_equal(a.params[2], 'needs to pee')
-        assert_equal(a.params[3], 'on')
-        assert_equal(a.params[4], '12/10/2020 2:00pm')
+        assert_equal(a.params[1], '@bob')
+        assert_equal(a.params[2], 'he')
+        assert_equal(a.params[3], 'needs to pee')
+        assert_equal(a.params[4], 'on')
+        assert_equal(a.params[5], '12/10/2020 2:00pm')
         a.respond(@client, 'bobroom')
         t = Time.new(2020, 10, 12, 14, 0)
         rtime = DateTime.parse(t.to_s)
