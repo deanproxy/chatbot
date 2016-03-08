@@ -26,10 +26,10 @@ class ParserTest < MiniTest::Test
 
         a = CommandParser::parse('/build MEOW-MIX')
         refute_nil(a)
-        assert_instance_of(BuildStart, a)
+        assert_instance_of(Build, a)
         a = CommandParser::parse('start build for MEOW-MIX')
         refute_nil(a)
-        assert_instance_of(BuildStart, a)
+        assert_instance_of(Build, a)
         a = CommandParser::parse('meow start build for MEOW-MIX')
         assert_nil(a)
         a = CommandParser::parse('meow /start build for MEOW-MIX')
@@ -37,10 +37,10 @@ class ParserTest < MiniTest::Test
 
         a = CommandParser::parse('/alias meow MEOW-MIX')
         refute_nil(a)
-        assert_instance_of(BuildAlias, a)
+        assert_instance_of(Build, a)
         a = CommandParser::parse('alias build meow MEOW-MIX')
         refute_nil(a)
-        assert_instance_of(BuildAlias, a)
+        assert_instance_of(Build, a)
         a = CommandParser::parse('meow /alias meow MEOW-MIX')
         assert_nil(a)
 
@@ -58,10 +58,10 @@ class ParserTest < MiniTest::Test
 
         a = CommandParser::parse('/deploy meow')
         refute_nil(a)
-        assert_instance_of(BuildDeploy, a)
+        assert_instance_of(Build, a)
         a = CommandParser::parse('deploy build meow')
         refute_nil(a)
-        assert_instance_of(BuildDeploy, a)
+        assert_instance_of(Build, a)
         a = CommandParser::parse('meow /deploy meow')
         assert_nil(a)
 
@@ -79,10 +79,10 @@ class ParserTest < MiniTest::Test
 
         a = CommandParser::parse('/watch meow')
         refute_nil(a)
-        assert_instance_of(BuildWatch, a)
+        assert_instance_of(Build, a)
         a = CommandParser::parse('watch build meow')
         refute_nil(a)
-        assert_instance_of(BuildWatch, a)
+        assert_instance_of(Build, a)
         a = CommandParser::parse('what watch build meow')
         assert_nil(a)
 

@@ -38,12 +38,12 @@ class Meme < Command
             :password => nil
         }
 
-        if not @params[0]
+        if not @params[1]
             print_help(client, room)
             return
         end
 
-        case @params[0].downcase
+        case @params[1].downcase
         when /i don't always (.*) but when i do (.*)/
             post_data[:template_id] = @memes[:interesting_man]
             post_data[:text0] = "I don't always #{$1}"
