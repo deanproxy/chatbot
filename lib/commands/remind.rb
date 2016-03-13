@@ -2,82 +2,88 @@ require_relative 'command'
 
 class Remind < Command
     def self.check_reminders(client)
-        client.db.execute('select id,jid,time,text,room from reminders where time <= ?', [DateTime.now.to_s]) do |row|
+        client.db.execute('select id,jid,time,:ext,room from reminders where time <= ?', [DateTime.now.to_s]) do |row|
             if row[4]
                 client.send(row[4], "Hey, #{row[1]}, #{row[3]}")
             else
-                mess = Jabber::Message.new
-                mess.to = row[1]
-                mess.from = client.config['xmpp']['username']
-                mess.body = "Hey, #{row[3]}"
-                mess.set_type(:chat)
-                client.send_message(mess)
+                client.send_message(row[1], "Hey, #{row[3]}")
             end
             client.db.execute("delete from reminders where id = ?", [row[0]])
             client.log.info("Sent a reminder to #{row[1]}")
         end
     end
 
-    def respond(client, room, time=nil, nick=nil, text=nil)
-        if @params.length == 6
+    def transform_language
+        noun = @params[2]
+        message = @params[3]
+
+        if noun
+            # Tranform noun
+            case noun.downcase
+            when /^(he|she)$/
+                noun = "you "
+            when /^(he\'s|she\'s)$/
+                noun = "you're "
+            end
+        end
+
+        # Transform verb
+        matches = /([A-Za-z']+) (.*)/.match(@params[3])
+        verb = ''
+        if matches
+            verb = matches[1]
+            case verb
+            when 'needs'
+                verb = 'need '
+            when 'wants'
+                verb = 'want '
+            when 'has'
+                verb = 'have '
+            when 'is'
+                verb = 'are '
+            when "hasn't"
+                verb = "haven't "
+            else
+                verb = "#{verb} "
+            end
+            message = "#{noun}#{verb}#{matches[2]}"
+        else
+            message = "#{noun}#{@params[3]}"
+        end
+
+        return message
+    end
+
+
+    def respond
+        if @params.length > 4
             # Don't allow reminders to self.
-            if @params[1] == client.config['xmpp']['botname']
-                client.send(room, "I'm sorry, I can't set reminders for myself.")
+            if @params[1] == @client.config['xmpp']['botname']
+                send("I'm sorry, I can't set reminders for myself.", @is_pm)
                 return
             end
-            nick = params[1]
 
-            # Transform certain nouns so it sounds appropriate
-            # when sending the reminder.
-            message = @params[3]
-            noun = @params[2] || ''
-            if noun.length
-                case noun.downcase
-                when /^(he|she)$/
-                    noun = "you"
-                when /^(he\'s|she\'s)$/
-                    noun = "you're"
-                end
-
-                # Transform verb
-                matches = @params[3].match("([A-Za-z']+) (.*)")
-                verb = ''
-                if matches
-                    verb = matches[1]
-                    case verb
-                    when 'needs'
-                        verb = 'need'
-                    when 'wants'
-                        verb = 'want'
-                    when 'has'
-                        verb = 'have'
-                    when 'is'
-                        verb = 'are'
-                    when "hasn't"
-                        verb = "haven't"
-                    end
-                    message = "#{noun} #{verb} #{matches[2]}"
-                else
-                    message = "#{noun}#{@params[3]}"
-                end
-
-            end
-
+            # Transform certain words so it sounds appropriate when sending the reminder.
+            message = transform_language()
             rtime = parse_time(@params[4], @params[5])
             readable_time = rtime.strftime("%m/%d/%Y %l:%M%p")
-            client.db.execute('insert into reminders(jid, time, text, room) values(?, ?, ?, ?)',
-                             [nick, rtime.to_s, message, room])
+            @client.db.execute('insert into reminders(jid, time, text, room) values(?, ?, ?, ?)',
+                             [@params[1], rtime.to_s, message, @room])
             text = "Okay. I've set a reminder `#{message}` at #{readable_time}"
-            client.send(room, text)
+            send(text, @is_pm)
         else
             rtime = parse_time(@params[2], @params[3])
-            jid = client.users[nick]['jid']
-            mention = client.users[nick]['mention']
-            client.db.execute("insert into reminders (jid, time, text) values(?, ?, ?)",
-                      [jid.to_s, rtime.to_s, @params[1]])
+            mention = ''
+            if @client.users.has_key?(@nick)
+                old_nick = @nick
+                @nick = @client.users[old_nick]['jid']
+                mention = " #{@client.users[old_nick]['mention']}"
+            end
+            @client.db.execute("insert into reminders (jid, time, text) values(?, ?, ?)",
+                      [@nick.to_s, rtime.to_s, @params[1]])
             readable_time = rtime.strftime("%m/%d/%Y %l:%M%p")
-            text = "Okay. I've set a reminder for you to `#{@params[1]}` at #{readable_time}"
-            client.send(room, text, mention)
+            text = "Okay#{mention}. I've set a reminder for you to `#{@params[1]}` at #{readable_time}"
+            send(text, @is_pm)
         end
     end
 
@@ -85,7 +91,7 @@ private
     def parse_time(qualifier, time)
         date = nil
         if qualifier.downcase == 'in'
-            match = time.match('([0-9]+) (\w+)')
+            match = /([0-9]+) (\w+)/.match(time)
             if match
                 time = Time.now
                 number = match[1].to_i

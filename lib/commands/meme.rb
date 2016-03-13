@@ -2,21 +2,21 @@ require 'net/http'
 require_relative 'command'
 
 class Meme < Command
-    def print_help(client, room)
-        client.send(room, "Here are the memes I can do:")
-        client.send(room, "/code * I don't always ___ but when I do ___\n" +
-                   "* Yo dawg ___ so ___\n" +
-                   "* One does not simply ___\n" +
-                   "* take my money\n" +
-                   "* Not sure if ___ or ___\n" +
-                   "* What if I told you ___\n" +
-                   "* Am I the only one around here ___\n" +
-                   "* ___ Ain't nobody got time for that'")
+    def print_help
+        send("Here are the memes I can do:", @is_pm)
+        send("/code * I don't always ___ but when I do ___\n" +
+             "* Yo dawg ___ so ___\n" +
+             "* One does not simply ___\n" +
+             "* take my money\n" +
+             "* Not sure if ___ or ___\n" +
+             "* What if I told you ___\n" +
+             "* Am I the only one around here ___\n" +
+             "* ___ Ain't nobody got time for that'", @is_pm)
     end
 
-    def respond(client, room, time=nil, nick=nil, text=nil)
-        if not client.config.has_key?('meme')
-            client.send(room, "Sorry, I'm not configured to do meme's. Check my config.")
+    def respond
+        if not @client.config.has_key?('meme')
+            send("Sorry, I'm not configured to do meme's. Check my config.", @is_pm)
             return
         end
 
@@ -44,7 +44,7 @@ class Meme < Command
         }
 
         if not @params[1]
-            print_help(client, room)
+            print_help
             return
         end
 
@@ -82,17 +82,18 @@ class Meme < Command
             post_data[:text0] = $1
             post_data[:text1] = "Ain't nobody got time for that!"
         when 'help'
-            print_help(client, room)
+            print_help
             return
         else
-            print_help(client, room)
+            print_help
             return
         end
 
-        url = client.config['meme']['post_url']
-        post_data[:username] = client.config['meme']['username']
-        post_data[:password] = client.config['meme']['password']
+        url = @client.config['meme']['post_url']
+        post_data[:username] = @client.config['meme']['username']
+        post_data[:password] = @client.config['meme']['password']
 
+        @client.log.debug("Going to generate a meme:")
         uri = URI.parse(url)
         http = Net::HTTP.new(uri.host)
         request = Net::HTTP::Post.new(uri.request_uri)
@@ -103,16 +104,16 @@ class Meme < Command
             if data['success']
                 meme_url = data['data']['url']
             else
-                client.log.error("Tried to make meme, but got error: #{data['error_message']}")
+                @client.log.error("Tried to make meme, but got error: #{data['error_message']}")
             end
         else
-            client.log.error("Tried to make meme, but got response: #{response.code}")
+            @client.log.error("Tried to make meme, but got response: #{response.code}")
         end
 
         if meme_url
-            client.send(room, meme_url)
+            send(meme_url)
         else
-            client.send(room, "Sorry, I couldn't generate a meme for that.")
+            send("Sorry, I couldn't generate a meme for that.'", @is_pm)
         end
     end
 end

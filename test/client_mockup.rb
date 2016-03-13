@@ -21,6 +21,10 @@ class ClientMockup
         File.unlink('test.db')
     end
 
+    def send_message(nick, text)
+        @last_send_msg << text
+    end
+
     def send(room, msg, to=nil)
         @last_send_msg << msg
     end

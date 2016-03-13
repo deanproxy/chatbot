@@ -24,6 +24,47 @@ class Bot
         @log = Logger.new('chatbot.log')
     end
 
+    def lookup_room(room)
+        found = nil
+        @config['xmpp']['rooms'].each do |k, v|
+            m = /(\d+)_(.+)/.match(k)
+            if m 
+                name = m[2].gsub('_', ' ')
+                if name.downcase == room.downcase
+                    found = k
+                    break
+                end
+            end
+        end
+        return found
+    end
+
+    def respond(text, nick, time, room=nil)
+        is_pm = room == nil
+
+        match = /^(?:room|channel)? (.+);(?:\s)?(.+)?/.match(text)
+        if match
+            room = lookup_room($1)
+            if !room 
+                send_message(nick, "Sorry, I can't post anything to that room because I'm not subscribed to it.")
+                return
+            end
+            text = $2
+        end
+
+        begin
+            cmd = CommandParser.parse(text)
+            if cmd
+                cmd.set_attributes(self, time, nick, room, text, is_pm)
+                cmd.respond
+            end
+        rescue => e
+            @log.fatal(e.message)
+            @log.fatal(e.backtrace)
+            @connection_dead = true
+        end
+    end
+
     def connect
         @client = Jabber::Client.new(@config['xmpp']['username'])
 
@@ -47,22 +88,24 @@ class Bot
             @rooms[room].on_message do |time, nick, text|
                 t = (time || Time.new).strftime("%I:%M")
                 # Make sure they're talking to us.
-                if nick != @config['xmpp']['nick'] && (text.match("^#{@botname} (.*)") || text.match("^(\/.*)"))
-                    begin
-                        cmd = CommandParser.parse($1)
-                        if cmd
-                            cmd.respond(self, room, t, nick, $1)
-                        end
-                    rescue => e
-                        @log.fatal(e.message)
-                        @log.fatal(e.backtrace)
-                        @connection_dead = true
-                    end
+                if nick != @config['xmpp']['nick'] && 
+                    (/^#{@botname} (.*)/.match(text) || /^(\/.*)/.match(text))
+                    respond($1, nick, t, room)
                 end
             end
         end
 
-
+        @client.add_message_callback do |mesg|
+            begin
+                if mesg.body and mesg.body.length
+                    respond(mesg.body, mesg.from, Time.new.strftime("%I:%M"))
+                end
+            rescue => e
+                @log.fatal(e.message)
+                @log.fatal(e.backtrace)
+                @connection_dead = true
+            end
+        end
 
         # Load initial roster
         @roster.get_roster()
@@ -78,8 +121,13 @@ class Bot
         self
     end
 
-    def send_message(message)
-        @client.send(message)
+    def send_message(nick, message)
+        mess = Jabber::Message.new
+        mess.to = nick
+        mess.from = @config['xmpp']['username']
+        mess.body = message
+        mess.set_type(:chat)
+        @client.send(mess)
     end
 
     def send(room, text, mention=nil)
@@ -114,13 +162,20 @@ OptionParser.new do |opts|
 	opts.on("-c", "--config", "Location of your YML config file.") do |v|
         options[:config] = v
     end
+    opts.on('-d', '--debug', "Debugging. Won't fork") do |v|
+        options[:debug] = true
+    end
 end
 
-pid = fork {
+# if options[:debug]
+    # pid = fork {
+        # b = Bot.new(options)
+        # b.connect.run
+    # }
+    # File.open("bot.pid", "w") do |f|
+        # f.write(pid)
+    # end
+# else
     b = Bot.new(options)
     b.connect.run
-}
-File.open("bot.pid", "w") do |f|
-    f.write(pid)
-end
-
+# end

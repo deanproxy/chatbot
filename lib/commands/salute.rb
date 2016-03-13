@@ -1,11 +1,11 @@
 require_relative 'command'
 
 class Salute < Command
-    def respond(client, room, time=nil, nick=nil, text=nil)
+    def respond
         if @params[1].downcase =~ /i love you/
-            client.send(room, 'Aww... shucks...')
+            send(room, 'Aww... shucks...', @is_pm)
         elsif @params[1].downcase =~ /welcome back/
-            client.send(room, "Hey, thanks! Great to be back.")
+            send(room, "Hey, thanks! Great to be back.", @is_pm)
         else
             responses = [
                 "What's up",
@@ -13,7 +13,7 @@ class Salute < Command
                 "Yo",
                 "What it is, my main human?"
             ]
-            client.send(room, responses[Random.rand(responses.length-1)])
+            send(responses[Random.rand(responses.length-1)], @is_pm)
         end
     end
 end

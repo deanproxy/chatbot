@@ -1,12 +1,12 @@
 require_relative 'command'
 
 class Die < Command
-    def respond(client, room, time=nil, nick=nil, text=nil)
+    def respond
         if text.downcase != "please die"
-            client.send(room, "You didn't say the magic word.")
+            send("You didn't say the magic word.", @is_pm)
             return
         end
-        client.send(room, "Okay. I'll kill myself now... :(")
+        send("Okay. I'll kill myself now... :(", @is_pm)
         raise "Die"
     end
 end

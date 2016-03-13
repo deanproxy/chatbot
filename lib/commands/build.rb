@@ -36,39 +36,39 @@ def post(url, username, password)
 end
 
 class Build < Command
-    def respond(client, room, time=nil, nick=nil, text=nil)
-        if not client.config.has_key?('bamboo')
-            client.send(room, "I'm sorry, but I'm not configured to use Bamboo. Check my config.")
+    def respond
+        if not @client.config.has_key?('bamboo')
+            send("I'm sorry, but I'm not configured to use Bamboo. Check my config.", @is_pm)
             return
         end
             
         config = client.config['bamboo']
         case @params['type'].downcase
         when 'build'
-            build(client, room, time, nick, text)
+            build
         when 'deploy'
-            deploy(client, room, time, nick, text)
+            deploy
         when 'watch'
-            watch(client, room, time, nick, text)
+            watch
         when 'status'
-            status(client, room, time, nick, text)
+            status
         when 'alias'
-            make_alias(client, room, time, nick, text)
+            make_alias
         when 'show aliases'
-            show_alias(client, room, time, nick, text)
+            show_alias
         else
-            client.send(room, "I'm not sure what you want me to do...'")
+            send("I'm not sure what you want me to do...'", @is_pm)
         end
     end
 
 private
-    def deploy(client, room, time=nil, nick=nil, text=nil)
-        client.send(room, "I can't do this yet. My owner is trying to teach me how to do this. Sorry.")
+    def deploy
+        send("I can't do this yet. My owner is trying to teach me how to do this. Sorry.", @is_pm)
     end
 
-    def build(client, room, time=nil, nick=nil, text=nil)
-        config = client.config['bamboo']
-        a = get_build_alias(client.db, @params['buildkey'])
+    def build
+        config = @client.config['bamboo']
+        a = get_build_alias(@client.db, @params['buildkey'])
         if !a
             a = @params['buildkey']
         end
@@ -76,39 +76,39 @@ private
         r = post(url, config['username'], config['password'])
         j = JSON.parse(r.body)
         if r.code == "200"
-            client.send(room, "Okay. I started a build for #{@params['buildkey']}. I'll keep an eye on it for you.")
+            send("Okay. I started a build for #{@params['buildkey']}. I'll keep an eye on it for you.")
             new_params = ["#{a}-#{j['buildNumber']}"]
-            watch(client, room, time, nick, text)
+            watch
         else
-            client.send(room, "Oops. Couldn't run that build for some reason. Response from build server was:")
-            client.send(room, "/code #{j['message']}")
+            send("Oops. Couldn't run that build for some reason. Response from build server was:", @is_pm)
+            send("/code #{j['message']}", @is_pm)
         end
     end
 
-    def watch(client, room, time=nil, nick=nil, text=nil)
-        config = client.config['bamboo']
-        build_key = @params['buildkey'].match('(\w+-\w+)-(\w+)')
+    def watch
+        config = @client.config['bamboo']
+        build_key = /(\w+-\w+)-(\w+)/.match(@params['buildkey'])
         if build_key
             plan,build_id = build_key[1,build_key.length]
         else
-            client.send(room, "Parse error. You sent me: #{@params['buildkey']}")
+            send("Parse error. You sent me: #{@params['buildkey']}", @is_pm)
             return
         end
 
         r = get("#{config['url_base']}/result/#{plan.upcase}/#{build_id}", config['username'], config['password'])
         j = JSON.parse(r.body)
         if r.code == '404'
-            client.send(room, "I'm sorry, I can't watch that build. Here's the reason: #{j['message']}")
+            send("I'm sorry, I can't watch that build. Here's the reason: #{j['message']}", @is_pm)
         else
             Thread.start do
-                _watch(client, room, plan.upcase, build_id)
+                _watch(plan.upcase, build_id)
             end
         end
     end
 
-    def status(client, room, time=nil, nick=nil, text=nil)
-        config = client.config['bamboo']
-        key = get_build_alias(client.db, @params['buildkey'])
+    def status
+        config = @client.config['bamboo']
+        key = get_build_alias(@client.db, @params['buildkey'])
         if !key
             key = @params['buildkey']
         end
@@ -120,21 +120,21 @@ private
             end
             id = result['id']
             state = result['state']
-            client.send(room, "#{emoticon} The latest build for #{@params['buildkey']} was #{state} (build ID #{id})")
+            send("#{emoticon} The latest build for #{@params['buildkey']} was #{state} (build ID #{id})")
         else
-            client.send(room, "I'm sorry, I couldn't find a build with the alias or key of #{@params['buildkey']}")
+            send("I'm sorry, I couldn't find a build with the alias or key of #{@params['buildkey']}", @is_pm)
         end
     end
 
-    def make_alias(client, room, time=nil, nick=nil, text=nil)
-        client.db.execute("insert into aliases (alias_key, alias_val) values(?,?)", 
+    def make_alias
+        @client.db.execute("insert into aliases (alias_key, alias_val) values(?,?)", 
                    [@params['alias'].upcase, @params['buildkey'].upcase])
-        client.send(room, "Okay. Saved a build alias of #{@params['alias'].upcase} -> #{@params['buildkey'].upcase}")
+        send("Okay. Saved a build alias of #{@params['alias'].upcase} -> #{@params['buildkey'].upcase}", @is_pm)
     end
 
-    def show_alias(client, room, time=nil, nick=nil, text=nil)
-        client.db.execute("select alias_key, alias_val from aliases") do |row|
-            client.send(room, "#{row[0]} -> #{row[1]}")
+    def show_alias
+        @client.db.execute("select alias_key, alias_val from aliases") do |row|
+            send("#{row[0]} -> #{row[1]}", @is_pm)
         end
     end
 
@@ -156,15 +156,15 @@ private
     end
 
 
-    def _watch(client, room, plan, build_id)
-        config = client.config['bamboo']
+    def _watch(plan, build_id)
+        config = @client.config['bamboo']
         loop do
             r = get("#{config['url_base']}/result/#{plan}/#{build_id}", config['username'], config['password'])
             if r.code == '200'
                 j = JSON.parse(r.body)
                 if j['state'] == "Unknown"
                     percentage = j['progress']['percentageCompletedPretty']
-                    client.send(room, "The build I'm watching (#{plan}-#{build_id}) is #{percentage} complete.")
+                    send("The build I'm watching (#{plan}-#{build_id}) is #{percentage} complete.")
                     sleep(60)
                 else
                     emoticon = "(greendot)"
@@ -172,7 +172,7 @@ private
                     if j['state'] == 'Failed'
                         light = "(reddot)"
                     end
-                    client.send(room, "#{emoticon} The build #{plan}-#{build_id} is finished. It's status is: #{state}")
+                    send("#{emoticon} The build #{plan}-#{build_id} is finished. It's status is: #{state}")
                     break
                 end
             end

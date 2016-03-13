@@ -29,7 +29,7 @@ class RemindTest < MiniTest::Test
         # Test a failure. If the person is not saying "remind me" or "remind @someuser" 
         # it should go to the default parser.
         a = CommandParser::parse('remind some guy to say hi in 1 minute')
-        assert_nil(a)
+        assert_instance_of(Default, a)
 
         # Test setting a reminder to ourself
         a = CommandParser::parse('remind @test that he is great in 1 minute')
@@ -39,7 +39,8 @@ class RemindTest < MiniTest::Test
         assert_equal(a.params[3], 'is great')
         assert_equal(a.params[4], 'in')
         assert_equal(a.params[5], '1 minute')
-        a.respond(@client, 'bobroom')
+        a.set_attributes(@client, Time.new, 'bob', 'bobroom')
+        a.respond
         assert_equal(@client.last_send_msg[0], "I'm sorry, I can't set reminders for myself.")
 
         a = CommandParser::parse('remind me to pee in 3 minutes')
@@ -51,8 +52,9 @@ class RemindTest < MiniTest::Test
         t = t + 180 
         rtime = DateTime.parse(t.to_s)
         english = rtime.strftime("%m/%d/%Y %l:%M%p")
-        a.respond(@client, 'bobroom', nil, 'bob')
-        assert_equal(@client.last_send_msg[0], "Okay. I've set a reminder for you to `pee` at #{english}")
+        a.set_attributes(@client, t, 'bob', 'bobroom')
+        a.respond
+        assert_equal(@client.last_send_msg[0], "Okay @bob. I've set a reminder for you to `pee` at #{english}")
         @client.db.execute("select id,jid,time,text,room from reminders") do |row|
             assert_equal(row[1], @client.users['bob']['jid'])
             t = DateTime.parse(row[2])
@@ -69,7 +71,8 @@ class RemindTest < MiniTest::Test
         assert_equal(a.params[3], 'needs to pee')
         assert_equal(a.params[4], 'at')
         assert_equal(a.params[5], '12/10/2020 1:15pm')
-        a.respond(@client, 'bobroom')
+        a.set_attributes(@client, nil, 'bob', 'bobroom')
+        a.respond
         t = Time.new(2020, 10, 12, 13, 15)
         rtime = DateTime.parse(t.to_s)
         english = rtime.strftime("%m/%d/%Y %l:%M%p")
@@ -91,7 +94,8 @@ class RemindTest < MiniTest::Test
         assert_equal(a.params[3], 'needs to pee')
         assert_equal(a.params[4], 'on')
         assert_equal(a.params[5], '12/10/2020 2:00pm')
-        a.respond(@client, 'bobroom')
+        a.set_attributes(@client, nil, 'bob', 'bobroom')
+        a.respond
         t = Time.new(2020, 10, 12, 14, 0)
         rtime = DateTime.parse(t.to_s)
         english = rtime.strftime("%m/%d/%Y %l:%M%p")
