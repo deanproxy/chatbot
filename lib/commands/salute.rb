@@ -3,9 +3,9 @@ require_relative 'command'
 class Salute < Command
     def respond
         if @params[1].downcase =~ /i love you/
-            send(room, 'Aww... shucks...', @is_pm)
+            send('Aww... shucks...', @is_pm)
         elsif @params[1].downcase =~ /welcome back/
-            send(room, "Hey, thanks! Great to be back.", @is_pm)
+            send("Hey, thanks! Great to be back.", @is_pm)
         else
             responses = [
                 "What's up",
